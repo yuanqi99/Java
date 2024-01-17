@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+<meta name="keywords" content="LightYear,LightYearAdmin,光年,后台模板,后台管理系统,光年HTML模板">
+<meta name="description" content="Light Year Admin V5是一个基于Bootstrap v5.1.3的后台管理系统的HTML模板。">
+<title>dropzone上传插件 - 光年(Light Year Admin V4)后台管理系统模板</title>
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" type="text/css" th:href="@{/css/materialdesignicons.min.css}">
+<link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min.css}">
+<link rel="stylesheet" type="text/css" th:href="@{/js/dropzone/basic.min.css}">
+<link rel="stylesheet" type="text/css" th:href="@{/js/dropzone/dropzone.min.css}">
+<link rel="stylesheet" type="text/css" th:href="@{/css/style.min.css}">
+<style>
+[data-theme='dark'] .dropzone,
+[data-theme|='translucent'] .dropzone {
+    background-color: rgba(var(--bs-white-rgb), .2);
+    border-color: rgba(var(--bs-white-rgb), .2);
+}
+</style>
+</head>
+  
+<body>
+<div class="container-fluid">
+
+  <div class="row">
+
+  	<div class="col-lg-12">
+  	  <div class="card">
+  	    <header class="card-header">
+  	      <div class="card-title">上传插件 dropzone</div>
+  	    </header>
+  		<div class="card-body">
+          
+  		  <p></p>
+          <input type="hidden" class="pic_hidden_url" name="picurl" value="" />
+          <div id="example-dropzone" class="dropzone"></div>
+          
+  	    </div>
+  	  </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/popper.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dropzone/dropzone.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/main.min.js}"></script>
+<script type="text/javascript">
+Dropzone.autoDiscover = false; 
+$(function() {
+    // 这里我后端返回的json为{"status":200,"info":"\u4e0a\u4f20\u6210\u529f","picurl":".\/upload\/images\/lyear_63902e1530175.jpg"}
+    var $maxFiels = 5;
+    var uploaded_filePaths = new Array(); // 用来保存已上传的文件路径
+    var myDropzone = $("#example-dropzone").dropzone({
+        url: "./data/upload.php?type=dropzone",
+        dictDefaultMessage: '拖动文件至此或者点击上传',
+        method: "post",  // 也可用put
+        paramName: "file", // 默认为file
+        maxFiles: $maxFiels,// 一次性上传的文件数量上限
+        maxFilesize: 2, // 文件大小，单位：MB
+        acceptedFiles: ".jpg,.gif,.png,.jpeg", // 上传的类型
+        addRemoveLinks: true,
+        parallelUploads: 1,// 并行处理的文件上载数量
+        dictDefaultMessage: '拖动文件至此或者点击上传',
+        dictMaxFilesExceeded: "您最多只能上传" + $maxFiels + "个文件！",
+        dictResponseError: '文件上传失败!',
+        dictInvalidFileType: "文件类型只能是*.jpg,*.gif,*.png,*.jpeg。",
+        dictFallbackMessage: "浏览器不受支持",
+        dictFileTooBig: "文件过大上传文件最大支持.",
+        dictRemoveLinks: "删除",
+        dictCancelUpload: "取消",
+        init: function () {
+            this.on("addedfile", function (file) {
+                // 上传文件时触发的事件
+            });
+            this.on("success", function (file, data) {
+                // 上传成功触发的事件
+                var resData = JSON.parse(data);
+                if (resData.status == 200) {
+                    $(".dz-filename span").each(function(){
+                        if ($(this).text() == file.name.trim()) {
+                            $(this).parent().parent().parent().find('.dz-remove').attr('data-src', resData.picurl);
+                            uploaded_filePaths.push(resData.picurl);
+                        }
+                    });
+                }
+            });
+            this.on("error", function (file, data) {
+                // 上传失败触发的事件
+            });
+            this.on("removedfile", function (file) {
+                // 删除文件时触发的方法
+                var $picpath = $(file.previewElement).find(".dz-remove").data('src');
+                // 已上传的你可以在这里去调用后端的删除接口
+                for(var i in uploaded_filePaths){
+                    var path = uploaded_filePaths[i];
+                    if ($picpath == path) {
+                        uploaded_filePaths.splice(i, 1);
+                    }
+                }
+                $('.pic_hidden_url').val(uploaded_filePaths.join(','));
+            });
+            this.on("queuecomplete", function(file,response) {
+                // 当上传队列中的所有文件上传完成时调用
+                $('.pic_hidden_url').val(uploaded_filePaths.join(','));                
+            });
+        }
+    });
+});
+</script>
+</body>
+</html>
