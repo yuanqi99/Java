@@ -49,11 +49,5 @@ public class App
         System.out.println("启动成功，Sa-Token 配置如下：" + SaManager.getConfig());
 
 
-
-
-
-
-
-
     }
 }
